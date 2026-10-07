@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTS-c Injection-Site Reactions: What May Actually Be Happening</title>
+<script>try{var __t=localStorage.getItem('motssite-theme');if(__t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+<style>
+*{box-sizing:border-box; margin:0; padding:0}
+:root{
+  --bg:#0c0908; --bg2:#110d0b; --card:#151110; --card2:#0d0b0a;
+  --line:#2b2320; --line2:#3a302b;
+  --text:#f7f3f0; --muted:#a8a094; --faint:#6f675e;
+  --crim:#f59e0b; --org:#a3e635; --teal:#14b8a6;
+  --accent:var(--crim); --radius:16px;
+}
+[data-theme="light"]{
+  --bg:#f2efec; --bg2:#e8e2dc; --card:#ffffff; --card2:#f4f1ed;
+  --line:#d8d0c8; --line2:#c4b9ae;
+  --text:#1d1713; --muted:#5c534b; --faint:#8d8378;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation:none!important; transition:none!important} }
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.65; font-size:16px; overflow-x:hidden;
+  background-image:radial-gradient(1100px 520px at 12% -5%, #f59e0b14 0%, transparent 60%),
+                   radial-gradient(900px 480px at 95% 8%, #14b8a610 0%, transparent 55%);
+}
+[data-theme="light"] body{background-image:radial-gradient(1100px 520px at 12% -5%, #b4530912 0%, transparent 60%),radial-gradient(900px 480px at 95% 8%, #0f766e12 0%, transparent 55%)}
+::selection{background:#f59e0b55}
+#progress{position:fixed; top:0; left:0; right:0; height:3px; z-index:300; pointer-events:none}
+#progressFill{height:100%; width:0; background:linear-gradient(90deg,var(--crim),var(--org),var(--teal)); border-radius:0 3px 3px 0}
+#bg-dots{position:fixed; inset:0; z-index:0; pointer-events:none}
+.shell{display:flex; min-height:100vh; position:relative; z-index:1}
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:252px; z-index:100;
+  background:rgba(12,9,8,.94); backdrop-filter:blur(10px); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; padding:24px 16px; gap:6px;
+  transition:transform .32s ease, background-color .45s ease, border-color .45s ease;
+}
+[data-theme="light"] .sidebar{background:rgba(242,239,236,.94)}
+.side-brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; padding:2px 8px 18px}
+.side-brand .drop{width:32px; height:32px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--crim),var(--org)); font-size:17px; flex:0 0 auto}
+.sidenav{display:flex; flex-direction:column; gap:4px; position:relative}
+.side-indicator{position:absolute; left:-16px; top:0; width:4px; height:40px; border-radius:2px; background:linear-gradient(180deg,var(--crim),var(--org)); box-shadow:0 0 12px #f59e0b88; opacity:0; transition:top .38s cubic-bezier(.2,.7,.2,1), height .38s cubic-bezier(.2,.7,.2,1), opacity .3s ease; pointer-events:none}
+.sidenav a{display:flex; align-items:center; gap:12px; color:var(--muted); text-decoration:none; font-size:13.5px; font-weight:600; padding:9px 12px; border-radius:10px; border:1px solid transparent}
+.sidenav a .n{font-size:11px; font-weight:800; color:var(--faint); background:#ffffff0c; border-radius:6px; padding:3px 7px; flex:0 0 auto}
+.sidenav a:hover{color:var(--text); background:#ffffff0c}
+.sidenav a.active{color:var(--text); background:#f59e0b14; border-color:#f59e0b44}
+.sidenav a.active .n{color:var(--crim); background:#f59e0b22}
+[data-theme="light"] .sidenav a:hover{background:rgba(30,22,18,.06)}
+.side-foot{margin-top:auto; display:flex; align-items:center; gap:10px; padding:8px}
+.side-foot span{font-size:12.5px; color:var(--faint); font-weight:600}
+.side-progress{padding:16px 10px 6px; margin-top:12px; border-top:1px solid var(--line)}
+.sp-head{display:flex; justify-content:space-between; align-items:baseline; font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--faint); margin-bottom:8px}
+.sp-head #sidePct{color:var(--crim); font-size:13px; letter-spacing:0}
+.sp-bar{height:6px; border-radius:3px; background:#ffffff10; overflow:hidden}
+.sp-bar #sideFill{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--crim),var(--org)); border-radius:3px}
+[data-theme="light"] .sp-bar{background:rgba(30,22,18,.09)}
+.theme-btn{width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:#ffffff0c; color:var(--text); font-size:18px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; transition:opacity .5s ease, transform .25s ease, background-color .4s ease}
+.theme-btn:hover{transform:scale(1.1)}
+.theme-btn.dim{opacity:.32}
+.theme-btn.dim:hover{opacity:1}
+.menu-btn{position:fixed; top:12px; left:12px; z-index:190; width:42px; height:42px; border-radius:12px; background:rgba(12,9,8,.88); backdrop-filter:blur(8px); border:1px solid var(--line); color:var(--text); font-size:18px; cursor:pointer; display:none; align-items:center; justify-content:center}
+.side-backdrop{position:fixed; inset:0; background:#000a; z-index:150; opacity:0; pointer-events:none; transition:opacity .3s ease}
+body.side-open .side-backdrop{opacity:1; pointer-events:auto}
+main{flex:1; min-width:0; padding-left:252px}
+.wrap{max-width:1060px; margin:0 auto; padding:0 32px}
+.mrail{display:none; position:sticky; top:0; z-index:90; background:rgba(12,9,8,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); overflow-x:auto; scrollbar-width:none; padding:10px 16px; gap:8px}
+[data-theme="light"] .mrail{background:rgba(242,239,236,.92)}
+.mrail::-webkit-scrollbar{display:none}
+.mrail a{flex:0 0 auto; color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid var(--line); white-space:nowrap}
+.mrail a.active{color:#1d1214; background:linear-gradient(135deg,var(--crim),var(--org)); border-color:transparent}
+.hero{padding:72px 0 26px; position:relative}
+.kicker{display:inline-block; font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--crim); border:1px solid #f59e0b55; background:#f59e0b12; padding:8px 16px; border-radius:999px; margin-bottom:20px}
+h1{font-size:clamp(36px,5.2vw,60px); line-height:1.08; letter-spacing:-1.5px; font-weight:900; margin-bottom:16px}
+h1 .grad{background:linear-gradient(92deg,var(--crim),var(--org) 55%,var(--teal)); -webkit-background-clip:text; background-clip:text; color:transparent}
+[data-theme="light"] h1 .grad{background:linear-gradient(92deg,#b45309,#4d7c0f 55%,#0f766e); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero p.lead{font-size:18px; color:var(--muted); max-width:62ch}
+.hero p.lead strong{color:var(--text)}
+.excite{position:relative; display:flex; gap:18px; align-items:center; border-radius:var(--radius); padding:22px 26px; margin:8px 0 4px; background:linear-gradient(180deg,var(--card),var(--card2)); overflow:hidden}
+.excite::before{content:""; position:absolute; inset:0; border-radius:var(--radius); padding:2px; background:linear-gradient(120deg,var(--crim),var(--org),var(--teal)); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none}
+.excite-emoji{font-size:44px; flex:0 0 auto; animation:excite-bounce 1.6s ease-in-out infinite}
+@keyframes excite-bounce{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-8px) rotate(6deg)}}
+@media (prefers-reduced-motion: reduce){ .excite-emoji{animation:none} }
+.excite h3{font-size:22px; font-weight:900; letter-spacing:-.4px; margin-bottom:4px; background:linear-gradient(92deg,var(--crim),var(--org)); -webkit-background-clip:text; background-clip:text; color:transparent}
+[data-theme="light"] .excite h3{background:linear-gradient(92deg,#b45309,#4d7c0f); -webkit-background-clip:text; background-clip:text; color:transparent}
+.excite p{color:var(--muted); font-size:15.5px; margin:0}
+.excite p strong{color:var(--text)}
+.disclaimer{border:1px solid #f59e0b44; background:#f59e0b0d; border-radius:var(--radius); padding:18px 22px; font-size:14px; color:var(--muted); margin:26px 0}
+.disclaimer strong{color:var(--crim)}
+section.chapter{padding:40px 0 8px; scroll-margin-top:16px}
+.ch-head{display:flex; align-items:center; gap:14px; margin-bottom:6px}
+.ch-num{flex:0 0 auto; min-width:52px; height:40px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:15px; color:#1d1214; background:linear-gradient(135deg,var(--crim),var(--org))}
+.ch-num.cool{background:linear-gradient(135deg,var(--teal),#0f766e); color:#062a26}
+h2{font-size:clamp(24px,3vw,32px); letter-spacing:-.6px; font-weight:800}
+.ch-sub{color:var(--muted); margin:2px 0 22px; max-width:72ch}
+.ch-sub strong{color:var(--text)}
+.card{background:linear-gradient(180deg,var(--card),var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:24px; transition:background-color .45s ease, border-color .45s ease}
+.card h3{font-size:17px; margin-bottom:8px}
+.card p{color:var(--muted); font-size:15px; margin:8px 0}
+.card p strong, .card li strong{color:var(--text)}
+.card ul{margin:10px 0 4px 20px; color:var(--muted); font-size:15px}
+.card li{margin:6px 0}
+.grid{display:grid; gap:16px}
+.grid.c2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.grid.c3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.dont{border:1px solid #f8717144; background:#f871710c; border-radius:12px; padding:14px 18px; font-size:14.5px; color:var(--muted); margin-top:12px}
+.dont strong{color:#f87171}
+.warn{border-left:4px solid var(--org); background:#a3e6350d; border-radius:0 14px 14px 0; padding:18px 22px; font-size:15.5px; color:var(--muted); margin:14px 0}
+.warn strong{color:var(--text)}
+.redflag{border-left:4px solid var(--crim); background:#f59e0b0d; border-radius:0 14px 14px 0; padding:18px 22px; font-size:15.5px; color:var(--muted); margin:14px 0}
+.redflag strong{color:var(--text)}
+.bigline{font-size:clamp(20px,2.6vw,26px); font-weight:800; letter-spacing:-.4px; line-height:1.45}
+.bigline .hl{background:linear-gradient(92deg,var(--crim),var(--org)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.checkline{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:15px; color:var(--muted)}
+.checkline:last-child{border-bottom:none}
+.checkline .mk{flex:0 0 auto; font-size:19px}
+.checkline strong{color:var(--text)}
+/* anecdote tiles: pulsing story-dot + legend */
+.alegend{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted); margin:0 0 16px; padding:12px 18px; border:1px dashed var(--line2); border-radius:12px}
+.adot{flex:0 0 auto; width:10px; height:10px; border-radius:50%; background:var(--crim); box-shadow:0 0 10px var(--crim); animation:adot 1.8s ease-in-out infinite}
+@keyframes adot{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.4); opacity:.5}}
+@media (prefers-reduced-motion: reduce){ .adot{animation:none} }
+.acard{position:relative; padding-top:22px}
+.acard .adot{position:absolute; top:14px; left:18px}
+/* ---------- glossary accordion ---------- */
+.gloss{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:linear-gradient(180deg,var(--card),var(--card2))}
+.g-item{border-bottom:1px solid var(--line)}
+.g-item:last-child{border-bottom:none}
+.g-q{width:100%; background:none; border:none; color:var(--text); font:inherit; font-size:1.02rem; font-weight:700; text-align:left; padding:1.05rem 1.4rem; cursor:pointer; display:flex; justify-content:flex-start; align-items:center; gap:1rem}
+.g-q:hover{background:#ffffff08}
+.g-q .term{color:var(--crim)}
+.g-item:nth-child(3n+2) .g-q .term{color:var(--org)}
+.g-item:nth-child(3n) .g-q .term{color:var(--teal)}
+.g-q .plus{flex:0 0 auto; width:1.7rem; height:1.7rem; border-radius:50%; border:1px solid var(--line); margin-left:auto; display:inline-flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--muted); transition:all .3s}
+.g-item.open .g-q .plus{transform:rotate(45deg); background:linear-gradient(135deg,var(--crim),var(--org)); color:#1d1214; border-color:transparent}
+.gthumb{flex:0 0 auto; width:42px; height:42px; border-radius:12px; border:1px solid var(--line); animation:gaFloat 5s ease-in-out infinite}
+.gthumb.v2{animation:gaBreathe 4.4s ease-in-out infinite}
+.gthumb.v3{animation:gaTilt 6s ease-in-out infinite}
+@keyframes gaFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes gaBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes gaTilt{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@media (prefers-reduced-motion: reduce){ .gthumb{animation:none} }
+.g-a{max-height:0; overflow:hidden; transition:max-height .45s ease}
+.g-a .gsci{padding:0 1.4rem 1rem; color:var(--muted); font-size:.95rem}
+.g-a .gsci strong{color:var(--text)}
+.gslabel{display:block; font-size:.7rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin-bottom:.35rem}
+.g-a .plain{margin:0 1.4rem 1.3rem; background:#ffffff08; border:1px dashed #ffffff22; border-radius:12px; padding:1rem 1.2rem; font-size:.96rem; color:var(--muted)}
+.g-a .plain .plabel{display:block; font-size:.72rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin-bottom:.35rem}
+.quiz{padding:0; overflow:hidden}
+.quiz-toggle{width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px; background:none; border:none; color:var(--text); font:inherit; font-weight:800; font-size:17px; padding:22px 24px; cursor:pointer; text-align:left}
+.quiz-chev{flex:0 0 34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--crim),var(--org)); color:#1d1214; font-size:22px; font-weight:800; transition:transform .25s}
+.quiz.open .quiz-chev{transform:rotate(45deg)}
+.quiz-body{display:grid; grid-template-rows:0fr; transition:grid-template-rows .32s ease}
+.quiz.open .quiz-body{grid-template-rows:1fr}
+.quiz-inner{overflow:hidden; min-height:0}
+.quiz-options{display:grid; gap:10px; padding:2px 24px 4px}
+.quiz-options button{display:flex; align-items:center; gap:12px; text-align:left; background:#ffffff08; border:1px solid var(--line); color:var(--text); padding:13px 18px; border-radius:12px; font:inherit; font-size:15.5px; font-weight:700; cursor:pointer}
+.quiz-options button small{color:var(--muted); font-weight:500; font-size:13.5px}
+.quiz-options button:hover{border-color:var(--crim)}
+.quiz-options button.picked{background:#f59e0b1c; border-color:var(--crim)}
+[data-theme="light"] .quiz-options button{background:rgba(30,22,18,.05)}
+.quiz-thanks{padding:4px 24px 0; color:var(--muted); font-size:14.5px; margin:12px 0 0}
+.quiz-thanks strong{color:var(--text)}
+.quiz-results{padding:2px 24px 24px}
+.qr-head{font-size:13.5px; color:var(--muted); margin:0 0 10px}
+#qrTotal{font-weight:700; color:var(--text)}
+.qr-row{display:grid; grid-template-columns:158px 1fr 118px; gap:12px; align-items:center; padding:7px 0; font-size:14.5px}
+.qr-label{font-weight:700; white-space:nowrap}
+.qr-bar{height:8px; border-radius:4px; background:#ffffff12; overflow:hidden}
+.qr-bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--crim),var(--org)); border-radius:4px; transition:width .6s ease}
+.qr-pct{color:var(--muted); font-size:13px; text-align:right; white-space:nowrap}
+[data-theme="light"] .qr-bar{background:rgba(30,22,18,.09)}
+/* ---------- animated diagrams between chapters ---------- */
+.diagram{background:linear-gradient(180deg,var(--card),var(--card2)); border:1px solid var(--line); border-radius:16px; padding:22px 24px 18px; margin:36px 0 4px}
+.d-title{font-size:13px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase; color:var(--faint); margin-bottom:8px}
+.diagram svg{width:100%; height:auto; display:block}
+.diagram text{font-family:inherit}
+.dt{fill:var(--text); font-weight:700}
+.dm{fill:var(--muted)}
+.d-cap{font-size:13.5px; color:var(--muted); margin-top:10px}
+.d-cap strong{color:var(--text)}
+.flow{stroke-dasharray:7 7; animation:d-dash 1.1s linear infinite}
+@keyframes d-dash{to{stroke-dashoffset:-28}}
+.d-pulse{transform-box:fill-box; transform-origin:center; animation:d-pulse 2.6s ease-in-out infinite}
+@keyframes d-pulse{0%,100%{opacity:.55; transform:scale(1)}50%{opacity:1; transform:scale(1.08)}}
+.d-bob{transform-box:fill-box; transform-origin:center; animation:d-bob 3s ease-in-out infinite}
+@keyframes d-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.d-ring{transform-box:fill-box; transform-origin:center; animation:d-ring 2.8s ease-out infinite}
+@keyframes d-ring{0%{opacity:.8; transform:scale(.55)}100%{opacity:0; transform:scale(1.55)}}
+.d-cycle{animation:d-cycle 8s ease-in-out infinite}
+@keyframes d-cycle{0%,100%{opacity:.28}6%,30%{opacity:1}40%{opacity:.28}}
+.d-flare{transform-box:fill-box; transform-origin:center; animation:d-flare 4.5s ease-in-out infinite}
+@keyframes d-flare{0%,100%{opacity:.15}25%{opacity:.85}55%{opacity:.2}}
+.d-drift{animation:d-drift 5s ease-in-out infinite}
+@keyframes d-drift{0%{opacity:0; transform:translate(0,0)}25%{opacity:.9}100%{opacity:0; transform:translate(46px,-34px)}}
+.d-dilute-a{animation:d-dilute 5s ease-in-out infinite}
+.d-dilute-b{animation:d-dilute 5s ease-in-out infinite reverse}
+@keyframes d-dilute{0%,100%{opacity:1}50%{opacity:.15}}
+/* back-to-top tile */
+.totop-wrap{text-align:center; margin:30px 0 8px}
+.totop{position:relative; display:inline-flex; align-items:center; gap:14px; background:linear-gradient(180deg,var(--card),var(--card2)); border:none; color:var(--text); font:inherit; font-weight:800; font-size:17px; padding:20px 38px; border-radius:16px; cursor:pointer; transition:transform .25s ease}
+.totop:hover{transform:translateY(-3px)}
+.totop::before{content:""; position:absolute; inset:0; border-radius:16px; padding:2px; background:linear-gradient(120deg,var(--crim),var(--org),var(--teal)); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none}
+.tt-arrow{width:38px; height:38px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--crim),var(--org)); color:#1d1214; font-size:20px; font-weight:900; flex:0 0 auto}
+footer{border-top:1px solid var(--line); margin-top:44px; padding:30px 0 46px; color:var(--faint); font-size:13.5px}
+footer strong{color:var(--muted)}
+.rv{opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease}
+.rv.in{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){ .rv{opacity:1; transform:none} }
+@media (min-width:901px){ .menu-btn,.side-backdrop{display:none!important} }
+@media (max-width:900px){
+  main{padding-left:0}
+  .sidebar{transform:translateX(-106%); width:282px; z-index:200}
+  body.side-open .sidebar{transform:none}
+  .menu-btn{display:inline-flex}
+  .mrail{display:flex}
+  .wrap{padding:0 18px}
+  .hero{padding:40px 0 16px}
+  .card{padding:18px 20px}
+  .qr-row{grid-template-columns:1fr auto; row-gap:6px}
+  .qr-bar{grid-column:1/-1; grid-row:2}
+}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"><div id="progressFill"></div></div>
+<canvas id="bg-dots" aria-hidden="true"></canvas>
+<div class="shell">
+<aside class="sidebar" id="sidebar" aria-label="Site navigation">
+  <div class="side-brand"><span class="drop">🔬</span> MOTS-c Reactions</div>
+  <nav class="sidenav" id="chapternav">
+    <span class="side-indicator" id="sideIndicator" aria-hidden="true"></span>
+    <a href="#ch1"><span class="n">01</span>Not endotoxins first</a>
+    <a href="#ch2"><span class="n">02</span>The depot effect</a>
+    <a href="#ch3"><span class="n">03</span>Why some react</a>
+    <a href="#ch4"><span class="n">04</span>Variables</a>
+    <a href="#ch5"><span class="n">05</span>Dilution limits</a>
+    <a href="#ch6"><span class="n">06</span>Supplier A vs B</a>
+    <a href="#ch7"><span class="n">07</span>Purity's limits</a>
+    <a href="#ch8"><span class="n">08</span>What a COA says</a>
+    <a href="#ch9"><span class="n">09</span>Conclusions</a>
+    <a href="#ch10"><span class="n">10</span>Community</a>
+    <a href="#ch11"><span class="n">11</span>If you react</a>
+    <a href="#ch12"><span class="n">12</span>Takeaway</a>
+    <a href="#ch13"><span class="n">13</span>Glossary</a>
+    <a href="#ch14"><span class="n">✦</span>Quiz</a>
+  </nav>
+  <div class="side-progress" aria-hidden="true">
+    <div class="sp-head"><span>Reading</span><span id="sidePct">0%</span></div>
+    <div class="sp-bar"><span id="sideFill"></span></div>
+  </div>
+  <div class="side-foot">
+    <button class="theme-btn" id="themeBtn" aria-label="Switch to light mode" title="Toggle light / dark">🌙</button>
+    <span>Light / dark</span>
+  </div>
+</aside>
+<button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+<div class="side-backdrop" id="sideBackdrop"></div>
+<main>
+<div class="mrail" id="mrail">
+  <a href="#ch1">01 · Reflex</a><a href="#ch2">02 · Depot</a><a href="#ch3">03 · Why some</a><a href="#ch4">04 · Variables</a><a href="#ch5">05 · Dilution</a><a href="#ch6">06 · Suppliers</a><a href="#ch7">07 · Purity</a><a href="#ch8">08 · COA</a><a href="#ch9">09 · Conclusions</a><a href="#ch10">10 · Community</a><a href="#ch11">11 · React</a><a href="#ch12">12 · Takeaway</a><a href="#ch13">13 · Glossary</a><a href="#ch14">✦ · Quiz</a>
+</div>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="kicker">🔬 Evidence check</span>
+    <h1>MOTS-c injection-site reactions: <span class="grad">what may actually be happening</span></h1>
+    <p class="lead">A welt after MOTS-c doesn't automatically mean one thing. Here's what the evidence actually supports — from a pharmaceutical analogue's human trials to what a lab report can and can't tell you.</p>
+  </div>
+
+  <div class="excite rv">
+    <div class="excite-emoji">🔬</div>
+    <div>
+      <h3>Not every welt has the same story</h3>
+      <p>When a red bump shows up after an injection, the internet reaches one instant verdict. This page walks through <strong>what might really be going on</strong> — and why certainty here is premature.</p>
+    </div>
+  </div>
+
+  <div class="disclaimer"><strong>📋 Educational reference only.</strong> This page discusses published and reported information about injection-site reactions. It isn't medical advice, doesn't diagnose anything, and isn't connected to any seller or manufacturer.</div>
+
+  <!-- 01 -->
+  <section class="chapter" id="ch1">
+    <div class="ch-head"><span class="ch-num">01</span><h2>Don't start with endotoxins</h2></div>
+    <p class="ch-sub">The reflex diagnosis — and why it's premature.</p>
+    <div class="card rv">
+      <p>When a welt, redness, itching, swelling, or a lump appears after MOTS-c, the instant verdict online is often <strong>"endotoxins."</strong> That should not be the automatic first assumption.</p>
+      <p>Injection-site reactions happen with other peptide products too. <strong>Tesamorelin</strong> — an FDA-approved peptide drug — showed injection-site reactions during its clinical development, and they're recognized with the approved product as well.</p>
+      <p>So the better question isn't <em>"is it endotoxin?"</em> It's: <strong>what could actually be happening at the injection site?</strong></p>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">The reflex vs the reality</p>
+    <svg viewBox="0 0 640 270" role="img" aria-label="Diagram: one welt, two ways of thinking — instant verdict versus several possible explanations">
+      <g>
+        <circle cx="110" cy="120" r="30" fill="#f8717133" stroke="#f87171" stroke-width="2"/>
+        <circle cx="110" cy="120" r="13" fill="#f87171" class="d-pulse"/>
+        <text x="110" y="172" text-anchor="middle" font-size="13" class="dm">a welt appears</text>
+      </g>
+      <path d="M150 100 C 230 80, 260 60, 320 55" fill="none" stroke="#f59e0b" stroke-width="2.5" class="flow"/>
+      <path d="M150 140 C 230 160, 260 185, 320 195" fill="none" stroke="#14b8a6" stroke-width="2.5" class="flow"/>
+      <g>
+        <rect x="330" y="22" width="270" height="72" rx="12" fill="#f59e0b0d" stroke="#f59e0b55"/>
+        <text x="350" y="50" font-size="12" class="dm">instant verdict</text>
+        <text x="350" y="74" font-size="17" class="dt">“Endotoxins!”</text>
+        <g class="d-pulse"><circle cx="572" cy="58" r="16" fill="#f87171"/><text x="572" y="65" text-anchor="middle" font-size="16" fill="#1d1214" font-weight="800">✕</text></g>
+      </g>
+      <g>
+        <rect x="330" y="162" width="270" height="86" rx="12" fill="#14b8a614" stroke="#14b8a655"/>
+        <text x="350" y="190" font-size="12" class="dm">better question</text>
+        <text x="350" y="212" font-size="15" class="dt">what else could it be?</text>
+        <g class="d-bob" style="animation-delay:0s"><circle cx="380" cy="232" r="4" fill="#f59e0b"/><text x="392" y="236" font-size="12" class="dm">depot?</text></g>
+        <g class="d-bob" style="animation-delay:.7s"><circle cx="470" cy="232" r="4" fill="#a3e635"/><text x="482" y="236" font-size="12" class="dm">immune?</text></g>
+        <g class="d-bob" style="animation-delay:1.4s"><circle cx="560" cy="232" r="4" fill="#14b8a6"/><text x="572" y="236" font-size="12" class="dm">quality?</text></g>
+      </g>
+    </svg>
+    <p class="d-cap">One symptom, several possible explanations — <strong>the reaction alone can't pick one</strong>.</p>
+  </div>
+
+  <!-- 02 -->
+  <section class="chapter" id="ch2">
+    <div class="ch-head"><span class="ch-num">02</span><h2>The depot effect</h2></div>
+    <p class="ch-sub">When the material lingers where it landed.</p>
+    <div class="card rv">
+      <p>One of the more plausible explanations is <strong>local buildup</strong> — injected material persisting in the tissue instead of dispersing normally. And the strongest hint comes from an actual human program: <strong>CB4211</strong>, a pharmaceutical analogue of MOTS-c that was tested in people.</p>
+      <p>During early development, injection-site reactions became significant enough that <strong>dosing was paused while the formulation was investigated</strong>. The team observed the injected material lingering locally, forming bumps that stuck around for extended periods.</p>
+      <p>Then the formulation was changed — and in the later phase, the reactions were mostly described as <strong>transient and mild to moderate</strong>.</p>
+      <div class="warn"><strong>The principle:</strong> the peptide itself isn't the only variable. <strong>Formulation can substantially change what happens at the injection site.</strong> Same peptide technology + different formulation = potentially a very different experience.</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">When the material stays put</p>
+    <svg viewBox="0 0 640 330" role="img" aria-label="Diagram: cross-section of skin layers showing injected material lingering locally instead of dispersing">
+      <rect x="40" y="46" width="560" height="34" rx="8" fill="#f59e0b1c"/>
+      <text x="54" y="68" font-size="12" class="dm">epidermis</text>
+      <rect x="40" y="80" width="560" height="88" rx="8" fill="#a3e63510"/>
+      <text x="54" y="102" font-size="12" class="dm">dermis</text>
+      <rect x="40" y="168" width="560" height="118" rx="8" fill="#14b8a610"/>
+      <text x="54" y="190" font-size="12" class="dm">subcutaneous tissue</text>
+      <g>
+        <line x1="512" y1="8" x2="446" y2="196" stroke="#a8a094" stroke-width="5" stroke-linecap="round"/>
+        <rect x="496" y="0" width="32" height="18" rx="4" fill="#a8a094"/>
+      </g>
+      <g>
+        <circle cx="400" cy="232" r="58" fill="none" stroke="#f59e0b" stroke-width="2" class="d-ring"/>
+        <circle cx="400" cy="232" r="58" fill="none" stroke="#f59e0b" stroke-width="2" class="d-ring" style="animation-delay:1.4s"/>
+        <g class="d-pulse">
+          <circle cx="386" cy="224" r="7" fill="#f59e0b"/><circle cx="404" cy="218" r="6" fill="#a3e635"/>
+          <circle cx="414" cy="236" r="7" fill="#f59e0b"/><circle cx="394" cy="242" r="5.5" fill="#a3e635"/>
+          <circle cx="378" cy="240" r="5" fill="#f59e0b"/><circle cx="408" cy="230" r="4.5" fill="#14b8a6"/>
+        </g>
+        <text x="170" y="300" text-anchor="middle" font-size="12" class="dm">a little disperses…</text>
+      </g>
+      <g>
+        <circle cx="300" cy="230" r="4" fill="#14b8a6" class="d-drift"/>
+        <circle cx="310" cy="244" r="3.4" fill="#14b8a6" class="d-drift" style="animation-delay:1.2s"/>
+        <circle cx="292" cy="250" r="3" fill="#a3e635" class="d-drift" style="animation-delay:2.4s"/>
+      </g>
+      <text x="500" y="300" text-anchor="middle" font-size="12" class="dm">…most stays — observed with CB4211</text>
+    </svg>
+    <p class="d-cap">Instead of dispersing, injected material can <strong>linger locally</strong> — the depot effect seen during CB4211's development.</p>
+  </div>
+
+  <!-- 03 -->
+  <section class="chapter" id="ch3">
+    <div class="ch-head"><span class="ch-num">03</span><h2>Why some react and others don't</h2></div>
+    <p class="ch-sub">Probably several mechanisms overlapping.</p>
+    <div class="card rv">
+      <p>The most honest picture right now: <strong>multiple mechanisms could overlap</strong>. A local irritation or depot effect is among the more plausible explanations, especially given what was seen with CB4211. If material stays concentrated in one spot rather than dispersing, that alone could drive redness, itching, swelling, or a palpable lump.</p>
+      <p>There could also be an immune or mast-cell component — but be careful with the claim <em>"MOTS-c releases histamine."</em> We don't have strong human evidence that every MOTS-c reaction is histamine-driven.</p>
+      <div class="warn"><strong>A brief red, itchy flare</strong> might plausibly involve histamine or mast-cell activity. <strong>A hard lump lasting days or weeks</strong> is a different presentation from a transient histamine-type flare. That distinction matters — not every reaction should be automatically filed under "allergic."</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Two different presentations</p>
+    <svg viewBox="0 0 640 300" role="img" aria-label="Diagram comparing a brief itchy flare that fades with a hard lump that persists">
+      <line x1="320" y1="20" x2="320" y2="280" stroke="#2b2320" stroke-width="1.5" stroke-dasharray="4 5"/>
+      <g>
+        <text x="170" y="42" text-anchor="middle" font-size="15" class="dt">Brief flare</text>
+        <rect x="70" y="60" width="200" height="120" rx="14" fill="#151110" stroke="#2b2320"/>
+        <ellipse cx="170" cy="120" rx="52" ry="34" fill="#f87171" class="d-flare"/>
+        <g class="d-bob">
+          <circle cx="170" cy="120" r="14" fill="#f59e0b"/>
+          <circle cx="158" cy="112" r="3.4" fill="#f87171"/><circle cx="182" cy="112" r="3.4" fill="#f87171"/><circle cx="170" cy="130" r="3.4" fill="#f87171"/>
+        </g>
+        <g class="d-bob" style="animation-delay:.8s"><circle cx="130" cy="150" r="3" fill="#f87171"/><circle cx="210" cy="150" r="3" fill="#f87171"/></g>
+        <text x="170" y="208" text-anchor="middle" font-size="12.5" class="dm">minutes–hours</text>
+        <text x="170" y="228" text-anchor="middle" font-size="12.5" class="dm">may involve mast cells</text>
+        <text x="170" y="262" text-anchor="middle" font-size="12.5" class="dm">redness · itch · then fades</text>
+      </g>
+      <g>
+        <text x="470" y="42" text-anchor="middle" font-size="15" class="dt">Persistent lump</text>
+        <rect x="370" y="60" width="200" height="120" rx="14" fill="#151110" stroke="#2b2320"/>
+        <g class="d-pulse" style="animation-duration:3.4s">
+          <path d="M420 130 Q470 84 520 130 L520 140 L420 140 Z" fill="#f59e0b2e" stroke="#f59e0b" stroke-width="2"/>
+          <circle cx="455" cy="122" r="5" fill="#f59e0b"/><circle cx="480" cy="118" r="4" fill="#a3e635"/><circle cx="468" cy="130" r="4.4" fill="#f59e0b"/>
+        </g>
+        <text x="470" y="208" text-anchor="middle" font-size="12.5" class="dm">days–weeks</text>
+        <text x="470" y="228" text-anchor="middle" font-size="12.5" class="dm">a different pattern</text>
+        <text x="470" y="262" text-anchor="middle" font-size="12.5" class="dm">firm · stays put · not just histamine</text>
+      </g>
+    </svg>
+    <p class="d-cap">A quick itchy flare and a hard lasting lump <strong>look different — and shouldn't share one explanation</strong>.</p>
+  </div>
+
+  <!-- 04 -->
+  <section class="chapter" id="ch4">
+    <div class="ch-head"><span class="ch-num cool">04</span><h2>Variables people mention</h2></div>
+    <p class="ch-sub">Dose, concentration, volume, depth — reported, not proven.</p>
+    <div class="card rv">
+      <p>People describe very different experiences depending on variables like <strong>dose, concentration, injection volume, site, and depth</strong>. Some report no noticeable reaction with small under-the-skin administrations. Others report redness or welts under some conditions but less irritation under different ones. Some react regardless of the variables. And some use MOTS-c for weeks without any reaction at all.</p>
+      <div class="warn"><strong>These are anecdotes, not clinical evidence</strong> — and they must not be read as a dosing or injection protocol. One person's experience shows what happened to them. It can't establish <em>why</em> it happened, or whether the same approach will work for someone else.</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Same input, different outcomes</p>
+    <svg viewBox="0 0 640 290" role="img" aria-label="Diagram: five reported variables converge, leading to three different possible outcomes">
+      <g font-size="13">
+        <g class="d-pulse" style="animation-delay:0s"><rect x="24" y="30" width="104" height="38" rx="19" fill="#f59e0b14" stroke="#f59e0b66"/><text x="76" y="54" text-anchor="middle" class="dt">dose</text></g>
+        <g class="d-pulse" style="animation-delay:.5s"><rect x="140" y="30" width="124" height="38" rx="19" fill="#a3e63514" stroke="#a3e63566"/><text x="202" y="54" text-anchor="middle" class="dt">concentration</text></g>
+        <g class="d-pulse" style="animation-delay:1s"><rect x="276" y="30" width="96" height="38" rx="19" fill="#14b8a614" stroke="#14b8a666"/><text x="324" y="54" text-anchor="middle" class="dt">volume</text></g>
+        <g class="d-pulse" style="animation-delay:1.5s"><rect x="384" y="30" width="96" height="38" rx="19" fill="#f59e0b14" stroke="#f59e0b66"/><text x="432" y="54" text-anchor="middle" class="dt">depth</text></g>
+        <g class="d-pulse" style="animation-delay:2s"><rect x="492" y="30" width="124" height="38" rx="19" fill="#a3e63514" stroke="#a3e63566"/><text x="554" y="54" text-anchor="middle" class="dt">site</text></g>
+      </g>
+      <g stroke-width="2.5" fill="none">
+        <path d="M76 68 C 120 110, 200 120, 280 140" stroke="#f59e0b" class="flow"/>
+        <path d="M202 68 C 230 110, 260 120, 300 140" stroke="#a3e635" class="flow"/>
+        <path d="M324 68 L 324 140" stroke="#14b8a6" class="flow"/>
+        <path d="M432 68 C 410 110, 380 120, 348 140" stroke="#f59e0b" class="flow"/>
+        <path d="M554 68 C 500 110, 420 120, 368 140" stroke="#a3e635" class="flow"/>
+      </g>
+      <g font-size="12.5">
+        <g class="d-cycle" style="animation-delay:0s">
+          <circle cx="180" cy="200" r="34" fill="#14b8a614" stroke="#14b8a6" stroke-width="2"/>
+          <text x="180" y="206" text-anchor="middle" font-size="20" fill="#14b8a6" font-weight="800">✓</text>
+          <text x="180" y="252" text-anchor="middle" class="dm">no reaction</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:2.6s">
+          <circle cx="320" cy="200" r="34" fill="#f59e0b14" stroke="#f59e0b" stroke-width="2"/>
+          <circle cx="320" cy="200" r="14" fill="#f8717166"/>
+          <text x="320" y="252" text-anchor="middle" class="dm">redness / welt</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:5.2s">
+          <circle cx="460" cy="200" r="34" fill="#a3e63514" stroke="#a3e635" stroke-width="2"/>
+          <path d="M442 208 Q460 188 478 208 Z" fill="#f59e0b55" stroke="#f59e0b" stroke-width="1.6"/>
+          <text x="460" y="252" text-anchor="middle" class="dm">firm lump</text>
+        </g>
+      </g>
+    </svg>
+    <p class="d-cap">People report different experiences as these variables change — <strong>reported patterns, not a protocol</strong>.</p>
+  </div>
+
+  <!-- 05 -->
+  <section class="chapter" id="ch5">
+    <div class="ch-head"><span class="ch-num">05</span><h2>Dilution isn't a guaranteed fix</h2></div>
+    <p class="ch-sub">When watering it down doesn't help.</p>
+    <div class="card rv">
+      <p>A curious pattern in user reports: <strong>increasing the amount of diluent doesn't consistently eliminate the reaction</strong>. If concentration were always the main driver, lowering it should reliably help — and it doesn't, consistently.</p>
+      <p>That's not proof of any particular mechanism. But it suggests the story is more complicated than <em>"the solution is too concentrated."</em> Formulation characteristics, aggregation, local tissue interaction, volume, administration conditions, or the individual's own immune response could all be in the mix.</p>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Dilution doesn't always fix it</p>
+    <svg viewBox="0 0 640 280" role="img" aria-label="Diagram: a concentrated drop and a diluted drop both lead to a reaction">
+      <g>
+        <text x="160" y="36" text-anchor="middle" font-size="14" class="dt">concentrated</text>
+        <path d="M160 60 C 160 60 132 100 132 118 A28 28 0 0 0 188 118 C 188 100 160 60 160 60 Z" fill="#f59e0b" class="d-dilute-a"/>
+        <path d="M196 150 L 224 150" stroke="#f59e0b" stroke-width="2.5" class="flow"/>
+        <path d="M96 150 L 124 150" stroke="#f59e0b" stroke-width="2.5" class="flow"/>
+        <g class="d-pulse"><circle cx="160" cy="196" r="26" fill="#f8717133" stroke="#f87171" stroke-width="2"/><circle cx="160" cy="196" r="11" fill="#f87171"/></g>
+        <text x="160" y="244" text-anchor="middle" font-size="12.5" class="dm">reaction</text>
+      </g>
+      <g>
+        <text x="480" y="36" text-anchor="middle" font-size="14" class="dt">diluted</text>
+        <path d="M480 60 C 480 60 452 100 452 118 A28 28 0 0 0 508 118 C 508 100 480 60 480 60 Z" fill="#f59e0b" class="d-dilute-a"/>
+        <path d="M480 60 C 480 60 452 100 452 118 A28 28 0 0 0 508 118 C 508 100 480 60 480 60 Z" fill="#14b8a6" opacity=".55" class="d-dilute-b"/>
+        <text x="480" y="132" text-anchor="middle" font-size="11.5" class="dm">+ more diluent</text>
+        <path d="M516 150 L 544 150" stroke="#14b8a6" stroke-width="2.5" class="flow"/>
+        <path d="M416 150 L 444 150" stroke="#14b8a6" stroke-width="2.5" class="flow"/>
+        <g class="d-pulse" style="animation-delay:1.3s"><circle cx="480" cy="196" r="26" fill="#f8717133" stroke="#f87171" stroke-width="2"/><circle cx="480" cy="196" r="11" fill="#f87171"/></g>
+        <text x="480" y="244" text-anchor="middle" font-size="12.5" class="dm">still a reaction — for some</text>
+      </g>
+      <text x="320" y="150" text-anchor="middle" font-size="22" class="dm" font-weight="800">≠</text>
+    </svg>
+    <p class="d-cap">If concentration were the whole story, diluting would reliably help. <strong>It doesn't — consistently.</strong></p>
+  </div>
+
+  <!-- 06 -->
+  <section class="chapter" id="ch6">
+    <div class="ch-head"><span class="ch-num">06</span><h2>Supplier A vs Supplier B</h2></div>
+    <p class="ch-sub">Different reaction ≠ proof of different quality.</p>
+    <div class="card rv">
+      <p>The classic puzzle: <strong>significant redness from one supplier's product, almost nothing from another's</strong>. The temptation is to declare the first one contaminated. That conclusion isn't justified by the reaction alone.</p>
+      <p>The products could differ in ways invisible on a basic purity result — and the person's own immune response could have shifted between uses. Possible differences include:</p>
+      <ul>
+        <li><strong>Formulation</strong> and <strong>concentration</strong></li>
+        <li><strong>Aggregation</strong> and other product characteristics</li>
+        <li><strong>Manufacturing process</strong> and <strong>storage conditions</strong></li>
+        <li><strong>Injection conditions</strong> and <strong>individual immune response</strong></li>
+      </ul>
+      <div class="warn"><strong>Different reaction ≠ automatic proof of different product quality.</strong> The observation is real; the explanation still needs evidence.</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Same look, hidden differences</p>
+    <svg viewBox="0 0 640 300" role="img" aria-label="Diagram: two identical-looking vials with hidden differences revealed under a magnifier, leading to different reactions">
+      <g>
+        <rect x="108" y="60" width="14" height="26" rx="4" fill="#a8a094"/>
+        <rect x="88" y="84" width="54" height="96" rx="10" fill="#f59e0b14" stroke="#f59e0b" stroke-width="2"/>
+        <text x="115" y="140" text-anchor="middle" font-size="22" class="dt">A</text>
+        <path d="M115 180 L 115 220" stroke="#f59e0b" stroke-width="2.5" class="flow"/>
+        <g class="d-pulse"><circle cx="115" cy="248" r="24" fill="#f8717133" stroke="#f87171" stroke-width="2"/><circle cx="115" cy="248" r="10" fill="#f87171"/></g>
+        <text x="115" y="288" text-anchor="middle" font-size="12.5" class="dm">strong reaction</text>
+      </g>
+      <g>
+        <rect x="508" y="60" width="14" height="26" rx="4" fill="#a8a094"/>
+        <rect x="488" y="84" width="54" height="96" rx="10" fill="#14b8a614" stroke="#14b8a6" stroke-width="2"/>
+        <text x="515" y="140" text-anchor="middle" font-size="22" class="dt">B</text>
+        <path d="M515 180 L 515 220" stroke="#14b8a6" stroke-width="2.5" class="flow"/>
+        <g class="d-pulse" style="animation-delay:1.3s"><circle cx="515" cy="248" r="24" fill="#14b8a614" stroke="#14b8a6" stroke-width="2"/><circle cx="515" cy="248" r="6" fill="#a3e635"/></g>
+        <text x="515" y="288" text-anchor="middle" font-size="12.5" class="dm">barely a mark</text>
+      </g>
+      <g>
+        <circle cx="315" cy="120" r="72" fill="none" stroke="#a3e635" stroke-width="3"/>
+        <line x1="368" y1="172" x2="402" y2="206" stroke="#a3e635" stroke-width="8" stroke-linecap="round"/>
+        <g font-size="12">
+          <g class="d-cycle" style="animation-delay:0s"><circle cx="285" cy="100" r="17" fill="#151110" stroke="#f59e0b" stroke-width="1.6"/><text x="285" y="105" text-anchor="middle" font-size="13" class="dt">⚗</text><text x="285" y="132" text-anchor="middle" class="dm">formulation</text></g>
+          <g class="d-cycle" style="animation-delay:2.6s"><circle cx="345" cy="100" r="17" fill="#151110" stroke="#14b8a6" stroke-width="1.6"/><text x="345" y="105" text-anchor="middle" font-size="13" class="dt">❄</text><text x="345" y="132" text-anchor="middle" class="dm">storage</text></g>
+          <g class="d-cycle" style="animation-delay:5.2s"><circle cx="315" cy="148" r="17" fill="#151110" stroke="#a3e635" stroke-width="1.6"/><circle cx="310" cy="146" r="3.4" fill="#f59e0b"/><circle cx="319" cy="149" r="3.4" fill="#f59e0b"/><text x="315" y="180" text-anchor="middle" class="dm">aggregation</text></g>
+        </g>
+        <text x="315" y="42" text-anchor="middle" font-size="13" class="dm">a closer look reveals…</text>
+      </g>
+    </svg>
+    <p class="d-cap">Products can differ in ways <strong>a basic purity result can't see</strong>.</p>
+  </div>
+
+  <!-- 07 -->
+  <section class="chapter" id="ch7">
+    <div class="ch-head"><span class="ch-num">07</span><h2>Purity isn't the whole story</h2></div>
+    <p class="ch-sub">A clean lab report doesn't guarantee silence under the skin.</p>
+    <div class="card rv">
+      <p>A certificate of analysis showing the expected identity and high analytical purity is still valuable. But <strong>it doesn't guarantee no injection-site reaction</strong>.</p>
+      <p>The CB4211 example is the proof: it was a pharmaceutical drug candidate and still ran into significant tolerability problems that required a formulation investigation. And tesamorelin is an approved pharmaceutical peptide that causes injection-site reactions.</p>
+      <div class="dont"><strong>So a welt doesn't automatically mean:</strong><br>❌ "It's endotoxins." &nbsp; ❌ "It's contaminated." &nbsp; ❌ "The vendor is bad."<br>Those are possible explanations that need proper evidence or testing. <strong>You can't diagnose endotoxin contamination by looking at a red bump.</strong></div>
+      <p>At the same time, product quality is not irrelevant: endotoxin, sterility problems, impurities, aggregation, or bad formulation can cause real problems — and they require appropriate testing to investigate.</p>
+      <div class="warn"><strong>The key point:</strong> an injection-site reaction alone cannot tell you <em>which</em> explanation is responsible.</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">What the report covers — and doesn't</p>
+    <svg viewBox="0 0 640 300" role="img" aria-label="Diagram: a lab report confirming identity and purity, with sterility, endotoxin, aggregation and formulation marked as unknown">
+      <g>
+        <rect x="215" y="20" width="210" height="260" rx="12" fill="#151110" stroke="#2b2320" stroke-width="1.5"/>
+        <text x="320" y="52" text-anchor="middle" font-size="14" class="dt">Certificate of analysis</text>
+        <line x1="235" y1="64" x2="405" y2="64" stroke="#2b2320"/>
+        <g font-size="13.5">
+          <text x="245" y="96" class="dm">identity</text><text x="395" y="96" text-anchor="end" font-size="15" fill="#14b8a6" font-weight="800">✓</text>
+          <text x="245" y="126" class="dm">purity 99%</text><text x="395" y="126" text-anchor="end" font-size="15" fill="#14b8a6" font-weight="800">✓</text>
+        </g>
+        <line x1="235" y1="142" x2="405" y2="142" stroke="#2b2320" stroke-dasharray="4 4"/>
+        <g font-size="13.5">
+          <g class="d-cycle" style="animation-delay:0s"><text x="245" y="172" class="dm">sterility</text><text x="395" y="172" text-anchor="end" font-size="15" class="dt">?</text></g>
+          <g class="d-cycle" style="animation-delay:2s"><text x="245" y="202" class="dm">endotoxin level</text><text x="395" y="202" text-anchor="end" font-size="15" class="dt">?</text></g>
+          <g class="d-cycle" style="animation-delay:4s"><text x="245" y="232" class="dm">aggregation</text><text x="395" y="232" text-anchor="end" font-size="15" class="dt">?</text></g>
+          <g class="d-cycle" style="animation-delay:6s"><text x="245" y="262" class="dm">formulation</text><text x="395" y="262" text-anchor="end" font-size="15" class="dt">?</text></g>
+        </g>
+      </g>
+      <g font-size="12.5">
+        <text x="120" y="150" text-anchor="middle" class="dm">answers the</text>
+        <text x="120" y="168" text-anchor="middle" class="dm">questions it</text>
+        <text x="120" y="186" text-anchor="middle" class="dm">was asked ✓</text>
+        <text x="520" y="150" text-anchor="middle" class="dm">silent on</text>
+        <text x="520" y="168" text-anchor="middle" class="dm">everything</text>
+        <text x="520" y="186" text-anchor="middle" class="dm">else ?</text>
+      </g>
+    </svg>
+    <p class="d-cap">A standard COA <strong>answers the questions it was asked</strong>. The rest stay open.</p>
+  </div>
+
+  <!-- 08 -->
+  <section class="chapter" id="ch8">
+    <div class="ch-head"><span class="ch-num cool">08</span><h2>What a COA actually tells you</h2></div>
+    <p class="ch-sub">Useful — but not a complete guarantee.</p>
+    <div class="card rv">
+      <p>A COA reports on the tested sample: <strong>identity and analytical purity</strong>, depending on the testing performed. But analytical purity is not the same as demonstrating:</p>
+      <ul>
+        <li><strong>Sterility</strong> or <strong>endotoxin levels</strong></li>
+        <li><strong>Absence of aggregation</strong></li>
+        <li><strong>Appropriate formulation</strong> and <strong>storage</strong></li>
+        <li><strong>Absence of every possible impurity</strong></li>
+        <li><strong>Consistent behavior</strong> once it's in tissue</li>
+      </ul>
+      <p>So a COA is useful without being a full quality guarantee — and a welt is <strong>not a substitute for laboratory testing</strong>.</p>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Where the evidence stands</p>
+    <svg viewBox="0 0 640 280" role="img" aria-label="Diagram: an evidence ladder from anecdotes up to proven mechanism, stopping at plausible mechanisms">
+      <g font-size="13.5">
+        <g class="d-cycle" style="animation-delay:0s">
+          <rect x="30" y="196" width="128" height="44" rx="12" fill="#f59e0b14" stroke="#f59e0b66"/><text x="94" y="223" text-anchor="middle" class="dt">anecdotes</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:1.6s">
+          <rect x="182" y="150" width="128" height="44" rx="12" fill="#a3e63514" stroke="#a3e63566"/><text x="246" y="177" text-anchor="middle" class="dt">patterns</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:3.2s">
+          <rect x="334" y="104" width="150" height="44" rx="12" fill="#14b8a614" stroke="#14b8a6"/><text x="409" y="131" text-anchor="middle" class="dt">plausible mechanisms</text>
+        </g>
+        <g opacity=".45">
+          <rect x="498" y="58" width="128" height="44" rx="12" fill="#151110" stroke="#2b2320" stroke-dasharray="5 4"/><text x="562" y="85" text-anchor="middle" class="dm">proven cause</text>
+        </g>
+      </g>
+      <g stroke="#a8a094" stroke-width="2" fill="none" opacity=".6">
+        <path d="M158 210 L 182 178"/><path d="M310 164 L 334 132"/><path d="M484 118 L 498 92" stroke-dasharray="4 4"/>
+      </g>
+      <g class="d-bob">
+        <circle cx="409" cy="80" r="10" fill="#a3e635"/>
+        <text x="409" y="58" text-anchor="middle" font-size="12" class="dm">we are here</text>
+      </g>
+      <text x="562" y="124" text-anchor="middle" font-size="12" class="dm">not yet</text>
+    </svg>
+    <p class="d-cap">Several mechanisms are plausible. <strong>One definitive explanation for every welt: not established.</strong></p>
+  </div>
+
+  <!-- 09 -->
+  <section class="chapter" id="ch9">
+    <div class="ch-head"><span class="ch-num">09</span><h2>What we can and cannot conclude</h2></div>
+    <p class="ch-sub">The defensible list.</p>
+    <div class="card rv">
+      <div class="checkline"><span class="mk">✅</span><span><strong>Reaction ≠ automatically endotoxins.</strong> A reaction by itself does not establish contamination.</span></div>
+      <div class="checkline"><span class="mk">✅</span><span><strong>No reaction ≠ proof the product is genuine.</strong> No reaction doesn't establish authenticity or quality.</span></div>
+      <div class="checkline"><span class="mk">✅</span><span><strong>Reaction ≠ proof it's working.</strong> A welt, lump, redness, or itching is never evidence of effectiveness.</span></div>
+      <div class="checkline"><span class="mk">✅</span><span><strong>Different preparations can give different experiences.</strong> The CB4211 formulation story shows why formulation deserves consideration.</span></div>
+    </div>
+    <div class="card rv" style="margin-top:16px">
+      <p class="bigline">We don't currently know <span class="hl">one definitive explanation</span> for every MOTS-c injection-site reaction.</p>
+      <p>Anyone claiming to know exactly why every welt occurs is getting ahead of the available evidence.</p>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">From voices to patterns</p>
+    <svg viewBox="0 0 640 260" role="img" aria-label="Diagram: community reports flow into a funnel that outputs patterns, labeled stories not data">
+      <g>
+        <g class="d-bob" style="animation-delay:0s">
+          <rect x="40" y="40" width="150" height="52" rx="14" fill="#f59e0b10" stroke="#f59e0b55"/>
+          <circle cx="66" cy="66" r="4" fill="#f59e0b"/><circle cx="80" cy="66" r="4" fill="#f59e0b"/><circle cx="94" cy="66" r="4" fill="#f59e0b"/>
+          <text x="140" y="71" text-anchor="middle" font-size="12" class="dm">“itchy welt”</text>
+        </g>
+        <g class="d-bob" style="animation-delay:.8s">
+          <rect x="40" y="104" width="150" height="52" rx="14" fill="#a3e63510" stroke="#a3e63555"/>
+          <circle cx="66" cy="130" r="4" fill="#a3e635"/><circle cx="80" cy="130" r="4" fill="#a3e635"/><circle cx="94" cy="130" r="4" fill="#a3e635"/>
+          <text x="140" y="135" text-anchor="middle" font-size="12" class="dm">“no reaction”</text>
+        </g>
+        <g class="d-bob" style="animation-delay:1.6s">
+          <rect x="40" y="168" width="150" height="52" rx="14" fill="#14b8a610" stroke="#14b8a655"/>
+          <circle cx="66" cy="194" r="4" fill="#14b8a6"/><circle cx="80" cy="194" r="4" fill="#14b8a6"/><circle cx="94" cy="194" r="4" fill="#14b8a6"/>
+          <text x="140" y="199" text-anchor="middle" font-size="12" class="dm">“stubborn lump”</text>
+        </g>
+      </g>
+      <g stroke-width="2.5" fill="none">
+        <path d="M190 66 C 250 70, 270 100, 300 118" stroke="#f59e0b" class="flow"/>
+        <path d="M190 130 L 300 130" stroke="#a3e635" class="flow"/>
+        <path d="M190 194 C 250 190, 270 160, 300 142" stroke="#14b8a6" class="flow"/>
+      </g>
+      <g>
+        <path d="M300 96 L 430 96 L 398 164 L 332 164 Z" fill="#151110" stroke="#2b2320" stroke-width="1.5"/>
+        <text x="365" y="136" text-anchor="middle" font-size="13" class="dt">patterns</text>
+        <path d="M352 164 L 352 196 M378 164 L 378 196" stroke="#a8a094" stroke-width="2.5" class="flow"/>
+        <rect x="300" y="200" width="130" height="40" rx="12" fill="#f59e0b0d" stroke="#f59e0b55"/>
+        <text x="365" y="225" text-anchor="middle" font-size="12.5" class="dm">stories, not data</text>
+      </g>
+      <text x="520" y="130" font-size="13" class="dm">useful for spotting</text>
+      <text x="520" y="150" font-size="13" class="dm">patterns — not for</text>
+      <text x="520" y="170" font-size="13" class="dm">proving mechanisms</text>
+    </svg>
+    <p class="d-cap">Community reports are useful for <strong>spotting patterns</strong> — not for proving mechanisms.</p>
+  </div>
+
+  <!-- 10 -->
+  <section class="chapter" id="ch10">
+    <div class="ch-head"><span class="ch-num">10</span><h2>Community reports</h2></div>
+    <p class="ch-sub">Stories, not data.</p>
+    <div class="alegend"><span class="adot"></span><span>● = recurring theme from forums and social media — <strong>stories, not data</strong>. Useful for spotting patterns, not for proving mechanisms.</span></div>
+    <div class="grid c3">
+      <div class="card acard rv"><span class="adot"></span><h3>Nothing at all</h3><p>Some people use MOTS-c for weeks and never develop a mark.</p></div>
+      <div class="card acard rv"><span class="adot"></span><h3>Pink for a day</h3><p>Mild redness that fades within about 24 hours.</p></div>
+      <div class="card acard rv"><span class="adot"></span><h3>Itchy welt</h3><p>A raised, itchy bump lasting two to three days.</p></div>
+      <div class="card acard rv"><span class="adot"></span><h3>The stubborn lump</h3><p>A firm lump under the skin that hangs around for over a week.</p></div>
+      <div class="card acard rv"><span class="adot"></span><h3>Supplier roulette</h3><p>Strong reaction from one source, barely anything from another.</p></div>
+      <div class="card acard rv"><span class="adot"></span><h3>Dilution didn't help</h3><p>Adding more diluent changed nothing for some users.</p></div>
+    </div>
+    <div class="warn rv"><strong>A pattern across many reports is interesting</strong> — but <em>"lots of people report X"</em> doesn't prove the mechanism. The observation and the explanation are two different things.</div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">Document, don't diagnose</p>
+    <svg viewBox="0 0 640 290" role="img" aria-label="Diagram: a reaction photographed on day 1, day 3 and day 7, changing over time">
+      <g font-size="13.5">
+        <g class="d-cycle" style="animation-delay:0s">
+          <rect x="50" y="50" width="150" height="170" rx="12" fill="#151110" stroke="#f59e0b" stroke-width="2"/>
+          <text x="125" y="80" text-anchor="middle" class="dt">Day 1</text>
+          <circle cx="125" cy="135" r="16" fill="#f8717144" stroke="#f87171" stroke-width="1.6"/>
+          <text x="125" y="196" text-anchor="middle" font-size="12" class="dm">small · red</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:2.6s">
+          <rect x="245" y="50" width="150" height="170" rx="12" fill="#151110" stroke="#f59e0b" stroke-width="2"/>
+          <text x="320" y="80" text-anchor="middle" class="dt">Day 3</text>
+          <circle cx="320" cy="135" r="30" fill="#f8717144" stroke="#f87171" stroke-width="1.6"/>
+          <circle cx="320" cy="135" r="12" fill="#f87171"/>
+          <text x="320" y="196" text-anchor="middle" font-size="12" class="dm">larger · itchy</text>
+        </g>
+        <g class="d-cycle" style="animation-delay:5.2s">
+          <rect x="440" y="50" width="150" height="170" rx="12" fill="#151110" stroke="#f59e0b" stroke-width="2"/>
+          <text x="515" y="80" text-anchor="middle" class="dt">Day 7</text>
+          <circle cx="515" cy="135" r="20" fill="#f59e0b22" stroke="#f59e0b" stroke-width="1.6"/>
+          <text x="515" y="196" text-anchor="middle" font-size="12" class="dm">fading · firm?</text>
+        </g>
+      </g>
+      <g class="d-bob">
+        <rect x="298" y="8" width="44" height="32" rx="8" fill="#14b8a614" stroke="#14b8a6" stroke-width="1.6"/>
+        <circle cx="320" cy="24" r="7" fill="none" stroke="#14b8a6" stroke-width="2"/>
+      </g>
+      <text x="320" y="252" text-anchor="middle" font-size="13" class="dm">when it appeared · how it changed · how it felt — <tspan class="dt">photos over time help</tspan></text>
+    </svg>
+    <p class="d-cap">Track <strong>when it appeared, how it changed, and how it felt</strong> — photos over time help.</p>
+  </div>
+
+  <!-- 11 -->
+  <section class="chapter" id="ch11">
+    <div class="ch-head"><span class="ch-num cool">11</span><h2>If you get a reaction</h2></div>
+    <p class="ch-sub">Document first, don't diagnose.</p>
+    <div class="card rv">
+      <p>The useful first step is <strong>documenting what happened</strong> rather than assigning a cause: when it appeared, how fast it developed, how large it became, itch vs pain, how long it lasted, any palpable lump, and any whole-body symptoms. Dated photos help show how it changes over time.</p>
+      <p>Don't assume a persistent or worsening reaction is simply "normal."</p>
+      <div class="redflag"><strong>Seek medical care promptly</strong> for: severe or rapidly worsening reactions, extensive swelling, major pain or warmth, drainage, fever, widespread hives, trouble breathing, face or throat swelling, fainting, or other whole-body symptoms.</div>
+    </div>
+  </section>
+
+  <div class="diagram rv">
+    <p class="d-title">The full chain</p>
+    <svg viewBox="0 0 640 300" role="img" aria-label="Diagram: the chain from preparation through formulation, concentration, aggregation, tissue interaction, immune response and susceptibility to the observed reaction">
+      <g font-size="12.5">
+        <g class="d-cycle" style="animation-delay:0s"><rect x="20" y="60" width="128" height="46" rx="12" fill="#f59e0b10" stroke="#f59e0b55"/><text x="84" y="88" text-anchor="middle" class="dt">preparation</text></g>
+        <g class="d-cycle" style="animation-delay:1s"><rect x="172" y="60" width="128" height="46" rx="12" fill="#f59e0b10" stroke="#f59e0b55"/><text x="236" y="88" text-anchor="middle" class="dt">formulation</text></g>
+        <g class="d-cycle" style="animation-delay:2s"><rect x="324" y="60" width="128" height="46" rx="12" fill="#a3e63510" stroke="#a3e63555"/><text x="388" y="88" text-anchor="middle" class="dt">concentration</text></g>
+        <g class="d-cycle" style="animation-delay:3s"><rect x="476" y="60" width="144" height="46" rx="12" fill="#a3e63510" stroke="#a3e63555"/><text x="548" y="88" text-anchor="middle" class="dt">aggregation</text></g>
+        <g class="d-cycle" style="animation-delay:4s"><rect x="20" y="170" width="148" height="46" rx="12" fill="#14b8a610" stroke="#14b8a655"/><text x="94" y="198" text-anchor="middle" class="dt">tissue interaction</text></g>
+        <g class="d-cycle" style="animation-delay:5s"><rect x="192" y="170" width="148" height="46" rx="12" fill="#14b8a610" stroke="#14b8a655"/><text x="266" y="198" text-anchor="middle" class="dt">immune response</text></g>
+        <g class="d-cycle" style="animation-delay:6s"><rect x="364" y="170" width="128" height="46" rx="12" fill="#f59e0b10" stroke="#f59e0b55"/><text x="428" y="198" text-anchor="middle" class="dt">susceptibility</text></g>
+        <g class="d-cycle" style="animation-delay:7s"><rect x="516" y="170" width="104" height="46" rx="12" fill="#f8717114" stroke="#f87171"/><text x="568" y="198" text-anchor="middle" class="dt">reaction</text></g>
+      </g>
+      <g stroke-width="2.5" fill="none">
+        <path d="M148 83 L 172 83" stroke="#f59e0b" class="flow"/>
+        <path d="M300 83 L 324 83" stroke="#a3e635" class="flow"/>
+        <path d="M452 83 L 476 83" stroke="#a3e635" class="flow"/>
+        <path d="M548 106 C 548 140, 300 140, 266 170" stroke="#14b8a6" class="flow"/>
+        <path d="M168 193 L 192 193" stroke="#14b8a6" class="flow"/>
+        <path d="M340 193 L 364 193" stroke="#f59e0b" class="flow"/>
+        <path d="M492 193 L 516 193" stroke="#f87171" class="flow"/>
+      </g>
+      <text x="320" y="262" text-anchor="middle" font-size="13" class="dm">a reaction at the end <tspan class="dt">can't identify which link mattered most</tspan></text>
+    </svg>
+    <p class="d-cap">Many links between the vial and the welt — <strong>a reaction at the end can't identify which link mattered most</strong>.</p>
+  </div>
+
+  <!-- 12 -->
+  <section class="chapter" id="ch12">
+    <div class="ch-head"><span class="ch-num">12</span><h2>The big takeaway</h2></div>
+    <p class="ch-sub">A framework, not a verdict.</p>
+    <div class="card rv">
+      <p class="bigline" style="font-size:clamp(17px,2.2vw,21px)">Preparation → formulation → concentration → aggregation → <span class="hl">local tissue interaction</span> → immune response → individual susceptibility → <span class="hl">observed reaction</span></p>
+      <p>Multiple factors can overlap. The CB4211 experience shows that <strong>formulation can matter</strong> and that local persistence of injected material is a real phenomenon.</p>
+      <p>So: <strong>reaction ≠ endotoxins. No reaction ≠ quality. Reaction ≠ efficacy. Different supplier ≠ different authenticity. Anecdote ≠ mechanism.</strong></p>
+      <p>Until MOTS-c itself is studied much more extensively in humans, the responsible position is to <strong>separate what we know from what we suspect</strong> — and not pretend every welt has one definitive explanation.</p>
+      <p class="bigline" style="margin-top:14px">We're still <span class="hl">connecting the dots</span>.</p>
+    </div>
+  </section>
+
+  <!-- 13 glossary -->
+  <section class="chapter" id="ch13">
+    <div class="ch-head"><span class="ch-num">13</span><h2>Understanding the terminology</h2></div>
+    <p class="ch-sub">Six terms, defined twice — once precisely, once plainly.</p>
+    <div class="gloss rv">
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v1" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#f59e0b22" stroke="#f59e0b"/><circle cx="21" cy="21" r="7" fill="#f59e0b"/><circle cx="13" cy="14" r="3" fill="#a3e635"/><circle cx="29" cy="28" r="3" fill="#14b8a6"/><circle cx="28" cy="13" r="2.4" fill="#a3e635"/><circle cx="14" cy="29" r="2.4" fill="#14b8a6"/></svg><span class="term">Endotoxin</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span><strong>Lipopolysaccharide fragments</strong> from the outer membrane of Gram-negative bacteria, released as the bacteria die or multiply. They are among the most potent known triggers of inflammation: even trace amounts can provoke fever and a strong immune response, which is why injectable drugs are strictly tested for them. Contamination usually enters through water, raw materials, or equipment during manufacturing — not from the drug molecule itself. Crucially, endotoxin requires <strong>laboratory testing</strong> to detect; it cannot be seen, smelled, or diagnosed from a skin reaction.</div>
+          <div class="plain"><span class="plabel">Plain English</span>Endotoxins are toxic fragments shed by certain bacteria, infamous for triggering powerful inflammation from even tiny amounts — which is why real injectable medicines are routinely lab-tested for them. They get in through contaminated water, ingredients, or equipment during manufacturing, not from the peptide itself. The key point: <strong>you cannot tell endotoxin is present by looking at a red bump</strong>. Only a lab test can show that.</div>
+        </div>
+      </div>
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v2" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#a3e63522" stroke="#a3e635"/><ellipse cx="21" cy="21" rx="10" ry="7" fill="#a3e635"/><ellipse cx="21" cy="21" rx="5" ry="3.4" fill="#f59e0b"/><path d="M8 8 L14 14 M34 8 L28 14 M8 34 L14 28 M34 34 L28 28" stroke="#a3e635" stroke-width="1.6"/></svg><span class="term">Depot effect</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span>A depot effect occurs when an injected substance <strong>remains concentrated at the injection site</strong> and disperses only slowly, instead of spreading promptly into surrounding tissue. This can result from the formulation's physical properties, local precipitation or aggregation of the material, or slow diffusion through tissue. Prolonged local presence extends the tissue's exposure, which can drive inflammation, lumps, or bumps lasting days to weeks. The <strong>CB4211 development program</strong> provided a concrete example: injected material visibly persisted at the site and produced lasting bumps until the formulation was changed.</div>
+          <div class="plain"><span class="plabel">Plain English</span>A depot effect is when the injected stuff just sits where it landed instead of spreading out normally. It can linger because of how it's formulated, because it clumps together, or because it moves through tissue very slowly. Hanging around longer means the tissue reacts longer — redness, swelling, or a lump that sticks around for days or weeks. The MOTS-c analogue <strong>CB4211</strong> showed exactly this: the material stayed put and made bumps until the recipe was changed.</div>
+        </div>
+      </div>
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v3" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#14b8a622" stroke="#14b8a6"/><path d="M12 28 L21 12 L30 28 Z" fill="none" stroke="#14b8a6" stroke-width="2.4"/><circle cx="21" cy="22" r="3.4" fill="#a3e635"/><circle cx="17.5" cy="26" r="2.2" fill="#f59e0b"/><circle cx="24.5" cy="26" r="2.2" fill="#f59e0b"/></svg><span class="term">Formulation</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span><strong>Everything in an injectable product besides the active ingredient</strong>: the liquid it's dissolved in, pH adjusters, stabilizers, preservatives, and the concentrations of each. Formulation governs the product's physical behavior — how it flows, whether the peptide stays dissolved or clumps, and how tissue tolerates it. Two products with the same active ingredient in different formulations can behave very differently at the injection site, as the CB4211 program demonstrated when a <strong>formulation change calmed significant site reactions</strong>. For research-grade products, formulation details are often undisclosed — an invisible variable.</div>
+          <div class="plain"><span class="plabel">Plain English</span>Formulation is everything in the vial besides the active ingredient: the liquid, the acidity, stabilizers, and how concentrated it all is. It decides how the product physically behaves — whether the peptide stays dissolved or clumps, and how the tissue reacts to it. The same active ingredient in a different formulation can feel completely different under the skin, which is exactly what happened when <strong>CB4211's recipe was changed</strong>. With research products you often can't even see the formulation, so it acts as a hidden variable.</div>
+        </div>
+      </div>
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v1" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#f59e0b22" stroke="#f59e0b"/><circle cx="16" cy="18" r="4.5" fill="#f59e0b"/><circle cx="24" cy="17" r="4.5" fill="#a3e635"/><circle cx="20" cy="25" r="4.5" fill="#f59e0b"/><circle cx="28" cy="25" r="3.4" fill="#14b8a6"/><circle cx="13" cy="26" r="3" fill="#a3e635"/></svg><span class="term">Aggregation</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span>The <strong>clumping of peptide molecules into larger assemblies</strong>, from small soluble clusters to visible particles or gels. It can be triggered by concentration, pH, temperature swings, agitation, or freeze–thaw cycles during manufacturing, shipping, or storage. Aggregated peptides may dissolve poorly, persist longer in tissue, and provoke stronger local immune responses than the same peptide in single-molecule form. Because aggregation is a <strong>physical state rather than a chemical impurity</strong>, a standard purity test can miss it entirely.</div>
+          <div class="plain"><span class="plabel">Plain English</span>Aggregation is when peptide molecules stick together into clumps, from tiny clusters up to visible bits. It can be triggered by heat, shaking, freezing and thawing, or just sitting too concentrated. Clumped peptide may hang around longer in the tissue and irritate it more than the same peptide in its normal single-molecule form. And because it's a <strong>physical clumping rather than a chemical contaminant</strong>, a standard purity test can sail right past it.</div>
+        </div>
+      </div>
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v2" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#a3e63522" stroke="#a3e635"/><circle cx="21" cy="21" r="9" fill="#a3e635"/><circle cx="18" cy="19" r="2" fill="#1d1214"/><circle cx="24" cy="19" r="2" fill="#1d1214"/><circle cx="16" cy="16" r="2.6" fill="#f59e0b"/><circle cx="26" cy="16" r="2.6" fill="#f59e0b"/><circle cx="21" cy="27" r="2.6" fill="#f59e0b"/></svg><span class="term">Mast cell</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span><strong>Immune cells stationed in tissues</strong> throughout the body, including the skin, packed with granules containing histamine and other inflammatory mediators. When triggered — by allergens, physical stimuli, or certain chemicals — they release these contents within minutes, producing the classic rapid response: redness, warmth, swelling, and itching. This is the mechanism behind hives and many insect-sting reactions. A brief red, itchy flare after an injection could plausibly involve mast cells, but <strong>a hard lump persisting for weeks follows a different pattern</strong> and shouldn't be automatically labeled a histamine reaction.</div>
+          <div class="plain"><span class="plabel">Plain English</span>Mast cells are the skin's rapid-response immune cells, loaded with histamine and other alarm chemicals. When something sets them off, they dump everything within minutes — the classic fast redness, swelling, and itching you see with hives or a bee sting. A quick red itchy flare after an injection could plausibly be mast cells at work. But <strong>a hard lump that sits there for weeks is a different beast</strong>, and shouldn't be automatically blamed on histamine.</div>
+        </div>
+      </div>
+      <div class="g-item">
+        <button class="g-q" aria-expanded="false"><svg class="gthumb v3" viewBox="0 0 42 42"><rect x="3" y="3" width="36" height="36" rx="10" fill="#14b8a622" stroke="#14b8a6"/><rect x="12" y="8" width="18" height="24" rx="2" fill="none" stroke="#14b8a6" stroke-width="2"/><path d="M15 15 H27 M15 20 H27 M15 25 H23" stroke="#a3e635" stroke-width="2"/><circle cx="30" cy="29" r="6" fill="#f59e0b"/><path d="M27.5 29 L29.2 30.8 L32.5 27.4" stroke="#1d1214" stroke-width="1.8" fill="none"/></svg><span class="term">Certificate of analysis (COA)</span><span class="plus">+</span></button>
+        <div class="g-a">
+          <div class="gsci"><span class="gslabel">Scientific definition</span>A document from a testing laboratory reporting the results of <strong>specific analytical tests on a specific sample</strong> — typically identity confirmation and chromatographic purity for peptides. Its scope is limited to the tests actually performed: a standard COA does not demonstrate sterility, endotoxin levels, absence of aggregates, or formulation quality unless those were separately tested. It also describes only the sample that was submitted, not necessarily every vial in a batch. A COA is therefore <strong>useful but bounded evidence</strong>: informative about what was measured, silent about what wasn't.</div>
+          <div class="plain"><span class="plabel">Plain English</span>A COA is a lab report on one specific sample, usually confirming "this is the right molecule" and "it's X% pure." But it only covers the tests that were actually run — a standard COA says <strong>nothing about sterility, endotoxin, clumping, or the formulation</strong> unless those were tested too. And it describes the sample that was mailed in, not necessarily every vial. Useful, but bounded: it tells you what was measured and stays silent about everything else.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 quiz -->
+  <section class="chapter" id="ch14">
+    <div class="ch-head"><span class="ch-num">✦</span><h2>Quick quiz</h2></div>
+    <p class="ch-sub">One question — did this change how you think about MOTS-c welts?</p>
+    <div class="card quiz rv" id="quizCard">
+      <button class="quiz-toggle" id="quizToggle" aria-expanded="false"><span>How useful was this guide?</span><span class="quiz-chev">+</span></button>
+      <div class="quiz-body"><div class="quiz-inner">
+        <div class="quiz-options" id="quizOpts" role="group" aria-label="Rate this guide">
+          <button data-v="3">🤯 Very useful <small>changed how I see it</small></button>
+          <button data-v="2">👍 Useful <small>cleared things up</small></button>
+          <button data-v="1">🙂 Okay <small>does the job</small></button>
+        </div>
+        <p class="quiz-thanks" id="quizThanks" hidden></p>
+        <div class="quiz-results" id="quizResults" hidden>
+          <p class="qr-head"><span id="qrTotal"></span> · <span>votes stay in this browser</span></p>
+          <div id="qrRows"></div>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <div class="totop-wrap rv">
+    <button class="totop" id="toTop" aria-label="Back to the top"><span class="tt-arrow">↑</span><span>Back to the top</span></button>
+  </div>
+
+</div><!-- /wrap -->
+<footer>
+  <div class="wrap">
+    <div class="disclaimer"><strong>📋 Please note:</strong> this page discusses reported and published information about injection-site reactions. It is for educational reference only, isn't medical advice, doesn't diagnose any condition, and isn't affiliated with any seller or manufacturer. MOTS-c is not an approved medicine; direct human data are extremely limited.</div>
+    <p><strong>MOTS-c injection-site reactions</strong> — an evidence check: don't assume endotoxins, consider the depot effect and formulation (the CB4211 story), separate anecdote from mechanism, and know what a COA can and can't tell you. We're still connecting the dots.</p>
+  </div>
+</footer>
+</main>
+</div><!-- /shell -->
+<script>
+const $=id=>document.getElementById(id);
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ambient dots */
+(function(){
+  const c=$('bg-dots'),x=c.getContext('2d');
+  const COLS=['#f59e0b','#a3e635','#14b8a6','#ef4444','#f59e0b','#14b8a6'];
+  let W,H,D;
+  function size(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  size(); addEventListener('resize',size);
+  D=Array.from({length:140},()=>({x:Math.random()*W,y:Math.random()*H,r:1.4+Math.random()*2.2,o:.30+Math.random()*.35,ph:Math.random()*6.28,sp:.004+Math.random()*.008,c:COLS[Math.random()*COLS.length|0]}));
+  (function tick(t){
+    x.clearRect(0,0,W,H);
+    for(const d of D){
+      const tw=.6+.4*Math.sin(t*d.sp+d.ph);
+      x.globalAlpha=d.o*tw; x.fillStyle=d.c;
+      x.beginPath(); x.arc(d.x,d.y,d.r,0,6.28); x.fill();
+    }
+    x.globalAlpha=1;
+    if(!REDUCED) requestAnimationFrame(tick);
+  })(0);
+})();
+/* reveal on scroll */
+(function(){
+  const els=document.querySelectorAll('.rv');
+  if(REDUCED||!('IntersectionObserver' in window)){els.forEach(e=>e.classList.add('in'));return;}
+  const o=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target);}}),{threshold:.08});
+  els.forEach(e=>o.observe(e));
+})();
+/* smooth scrolling */
+let scrollAnim=null;
+function smoothTo(t){
+  const doc=document.documentElement;
+  const sy=scrollY, ey=Math.max(0,t.getBoundingClientRect().top+sy-8), d=ey-sy;
+  cancelAnimationFrame(scrollAnim);
+  if(REDUCED||Math.abs(d)<4){ scrollTo(0,ey); return; }
+  const prev=doc.style.scrollBehavior; doc.style.scrollBehavior='auto';
+  const dur=Math.min(1100,420+Math.abs(d)*.32), t0=performance.now();
+  const ez=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+  const clean=()=>{ doc.style.scrollBehavior=prev; removeEventListener('wheel',ou); removeEventListener('touchmove',ou); };
+  const ou=()=>{ cancelAnimationFrame(scrollAnim); clean(); };
+  addEventListener('wheel',ou,{passive:true}); addEventListener('touchmove',ou,{passive:true});
+  function fr(now){
+    const p=Math.min(1,(now-t0)/dur);
+    scrollTo(0,sy+d*ez(p));
+    if(p<1) scrollAnim=requestAnimationFrame(fr); else clean();
+  }
+  scrollAnim=requestAnimationFrame(fr);
+}
+/* sidebar links + gliding indicator */
+(function(){
+  const links=[...document.querySelectorAll('#chapternav a')];
+  const ind=$('sideIndicator');
+  function moveIndicator(act){
+    if(!act){ ind.style.opacity=0; return; }
+    ind.style.opacity=1;
+    ind.style.top=(act.offsetTop+4)+'px';
+    ind.style.height=(act.offsetHeight-8)+'px';
+  }
+  function activate(id,link){
+    links.forEach(l=>l.classList.toggle('active',l===link));
+    moveIndicator(link);
+    document.querySelectorAll('#mrail a').forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+id));
+    if(history.replaceState) history.replaceState(null,'','#'+id);
+  }
+  links.forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t) smoothTo(t);
+      activate(a.getAttribute('href').slice(1),a);
+      if(innerWidth<=900) close();
+    });
+  });
+  document.querySelectorAll('#mrail a').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t) smoothTo(t);
+    });
+  });
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const obs=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        const id=e.target.id;
+        const link=links.find(l=>l.getAttribute('href')==='#'+id);
+        if(link) activate(id,link);
+      }
+    });
+  },{rootMargin:'-40% 0px -55% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  addEventListener('resize',()=>{const a=links.find(l=>l.classList.contains('active'));moveIndicator(a||null);});
+})();
+/* mobile drawer */
+function close(){document.body.classList.remove('side-open');}
+(function(){
+  const sb=$('sidebar');
+  $('menuBtn').onclick=()=>document.body.classList.add('side-open');
+  $('sideBackdrop').onclick=close;
+  addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+})();
+/* reading progress */
+(function(){
+  const f=$('progressFill'), sf=$('sideFill'), sp=$('sidePct');
+  function upd(){
+    const h=document.documentElement;
+    const max=h.scrollHeight-h.clientHeight;
+    const p=max>0?Math.min(1,scrollY/max):0;
+    f.style.width=(p*100)+'%';
+    sf.style.width=(p*100)+'%';
+    sp.textContent=Math.round(p*100)+'%';
+  }
+  addEventListener('scroll',upd,{passive:true}); upd();
+})();
+/* theme */
+(function(){
+  const b=$('themeBtn');
+  const dark=()=>!document.documentElement.hasAttribute('data-theme');
+  function paint(){ b.textContent=dark()?'🌙':'☀️'; b.setAttribute('aria-label',dark()?'Switch to light mode':'Switch to dark mode'); }
+  b.onclick=()=>{
+    if(dark()) document.documentElement.setAttribute('data-theme','light');
+    else document.documentElement.removeAttribute('data-theme');
+    try{localStorage.setItem('motssite-theme',dark()?'dark':'light');}catch(e){}
+    paint(); b.classList.add('dim');
+  };
+  paint();
+})();
+/* glossary accordion */
+document.querySelectorAll('.g-item').forEach(it=>{
+  const q=it.querySelector('.g-q'), a=it.querySelector('.g-a');
+  q.addEventListener('click',()=>{
+    const open=it.classList.contains('open');
+    document.querySelectorAll('.g-item.open').forEach(o=>{
+      o.classList.remove('open'); o.querySelector('.g-a').style.maxHeight=null;
+      o.querySelector('.g-q').setAttribute('aria-expanded','false');
+    });
+    if(!open){
+      it.classList.add('open'); q.setAttribute('aria-expanded','true');
+      requestAnimationFrame(()=>{ a.style.maxHeight=a.scrollHeight+'px'; });
+    }
+  });
+});
+/* back to top: smooth animated scroll */
+(function(){
+  const btn=$('toTop'); if(!btn) return;
+  btn.onclick=()=>{
+    const sy=scrollY;
+    cancelAnimationFrame(scrollAnim);
+    if(REDUCED||sy<4){ scrollTo(0,0); return; }
+    const dur=Math.min(1100,420+sy*.32), t0=performance.now();
+    const ez=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    function fr(now){
+      const p=Math.min(1,(now-t0)/dur);
+      scrollTo(0,sy*(1-ez(p)));
+      if(p<1) scrollAnim=requestAnimationFrame(fr);
+    }
+    scrollAnim=requestAnimationFrame(fr);
+  };
+})();
+/* rating quiz */
+(function(){
+  const KEY='motssite-quiz-votes', card=$('quizCard');
+  const labels={3:'Very useful',2:'Useful',1:'Okay'};
+  let votes={}; try{votes=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){votes={};}
+  $('quizToggle').onclick=()=>{
+    const open=card.classList.toggle('open');
+    $('quizToggle').setAttribute('aria-expanded',open);
+  };
+  function render(){
+    const total=Object.values(votes).reduce((a,b)=>a+b,0);
+    $('qrTotal').textContent=total+(total===1?' vote':' votes');
+    $('qrRows').innerHTML=[3,2,1].map(v=>{
+      const n=votes[v]||0, pct=total?Math.round(n/total*100):0;
+      return '<div class="qr-row"><span class="qr-label">'+labels[v]+'</span><span class="qr-bar"><span style="width:'+pct+'%"></span></span><span class="qr-pct">'+n+' · '+pct+'%</span></div>';
+    }).join('');
+  }
+  $('quizOpts').querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{
+      const v=b.dataset.v;
+      votes[v]=(votes[v]||0)+1;
+      try{localStorage.setItem(KEY,JSON.stringify(votes));}catch(e){}
+      document.querySelectorAll('#quizOpts button').forEach(x=>x.classList.remove('picked'));
+      b.classList.add('picked');
+      const th=$('quizThanks');
+      th.innerHTML='Thanks — you rated this guide <strong>'+labels[v].toLowerCase()+'</strong>.';
+      th.hidden=false;
+      $('quizResults').hidden=false;
+      render();
+    };
+  });
+  if(Object.keys(votes).length){ $('quizResults').hidden=false; render(); }
+})();
+</script>
+</body>
+</html>
